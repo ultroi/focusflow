@@ -1,0 +1,4 @@
+import {Router} from 'express';import {auth} from '../middleware/auth.js';import UserSettings from '../models/UserSettings.js';
+const r=Router();r.use(auth);const defaults={focusDefault:25,distractionDetection:true,saveAIHistory:false,reduceMotion:false,blockedDomains:['youtube.com','instagram.com','reddit.com','x.com','facebook.com'],timezone:'Asia/Kolkata'};
+r.get('/',async(req,res)=>{let s=await UserSettings.findOne({userId:req.user.id});if(!s)s=await UserSettings.create({userId:req.user.id,...defaults});res.json(s)});
+r.put('/',async(req,res)=>{let s=await UserSettings.findOne({userId:req.user.id});const patch={};for(const k of Object.keys(defaults)){if(req.body[k]!==undefined)patch[k]=req.body[k]}s=await UserSettings.findOneAndUpdate({userId:req.user.id},{...patch,userId:req.user.id},{new:true,upsert:true,setDefaultsOnInsert:true});res.json(s)});export default r;

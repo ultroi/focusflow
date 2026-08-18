@@ -1,0 +1,1 @@
+{"name":"focusflow-ai","private":true,"scripts":{"install:all":"npm --prefix server install && npm --prefix extension install && npm --prefix dashboard install"}}

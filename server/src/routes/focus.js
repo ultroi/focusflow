@@ -1,0 +1,5 @@
+import {Router} from 'express';import {auth} from '../middleware/auth.js';import FocusSession from '../models/FocusSession.js';
+const r=Router();r.use(auth);
+r.post('/start',async(req,res)=>{const duration=Math.max(1,Math.min(480,Number(req.body.duration||25)));const s=await FocusSession.create({userId:req.user.id,taskId:req.body.taskId||undefined,duration,startedAt:new Date()});res.status(201).json(s)});
+r.post('/end/:id',async(req,res)=>{const s=await FocusSession.findOne({_id:req.params.id,userId:req.user.id});if(!s)return res.status(404).json({message:'Session not found'});s.endedAt=new Date();s.completed=!!req.body.completed;s.interrupted=!!req.body.interrupted;await s.save();res.json(s)});
+r.get('/stats',async(req,res)=>{const start=new Date();start.setHours(0,0,0,0);const sessions=await FocusSession.find({userId:req.user.id,startedAt:{$gte:start}});const total=sessions.reduce((a,s)=>a+s.duration,0);res.json({sessions:sessions.length,minutes:total,completed:sessions.filter(s=>s.completed).length,interrupted:sessions.filter(s=>s.interrupted).length})});export default r;
